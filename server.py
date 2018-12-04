@@ -111,7 +111,6 @@ def modify():
         if 'remove' in request.form:
             entry.remove()
             klog.commit('Removed %s' % entry.shortlog)
-            cfg.update_trigger()
             info = 'Entry successfully removed', 'success'
             return render_template('list.html', info=info, content=klog.years_dict())
         elif entry_raw == str(entry) and len(removals) == 0:
@@ -123,7 +122,6 @@ def modify():
                 entry.reload(entry_raw, True)
                 info = 'success', 'success'
                 klog.commit('Modified %s ' % entry.shortlog)
-                cfg.update_trigger()
             except ValueError as e:
                 info = str(e), 'danger'
 
@@ -147,7 +145,6 @@ def new():
             entry.reload(entry_raw, True)
             info = 'success', 'success'
             klog.commit('Modified %s ' % entry.shortlog)
-            cfg.update_trigger()
             return render_template('list.html', info=info, content=klog.years_dict())
         except ValueError as e:
             info = str(e), 'danger'

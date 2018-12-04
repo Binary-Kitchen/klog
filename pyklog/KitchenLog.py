@@ -261,12 +261,6 @@ class Config:
             print('Updating repo...')
             self.repo.remote('origin').pull()
 
-    def update_trigger(self):
-        try:
-            urllib.request.urlopen(self._update_trigger)
-        except Exception as e:
-            print('Update trigger error: %s' % str(e))
-
 
 class KitchenLog:
     FILES_GLOB = join('20*', '*', '*.txt')
