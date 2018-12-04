@@ -31,7 +31,7 @@ from glob import glob
 from jinja2 import Template
 from os.path import join, normpath, expanduser, isdir
 
-from .LogEntry import LogEntry, parse_ymd, format_ymd
+from .LogEntry import LogEntry, parse_ymd
 
 landing_page = Template(
 """====== Küchen-Log ======
@@ -39,7 +39,7 @@ landing_page = Template(
 {% for year, months in content|dictsort(reverse=true) -%}
 ===== {{ year }} =====
 {% for month, entries in months|dictsort(reverse=true) -%}
-{% raw %}  {% endraw %}* [[:kitchenlog:{{ year }}-{{ '%02d' % month }}|{{ entries[0].begin.strftime('%B') }}]]
+{% raw %}  {% endraw %}* [[:{{ namespace }}:{{ year }}-{{ '%02d' % month }}|{{ entries[0].begin.strftime('%B') }}]]
 {% endfor %}
 {% endfor %}
 """)
@@ -49,7 +49,7 @@ month_page = Template(
 
 **//If it's not in the log, it didn't happen!//**
 
-{% raw %}{{{% endraw -%}blog>kitchenlog:entry:{{ date.year }}:{{ '%02d' % date.month }}?31&nouser&nodate&nomdate{% raw %}}}{% endraw %}
+{% raw %}{{{% endraw -%}blog>{{ namespace }}:entry:{{ date.year }}:{{ '%02d' % date.month }}?31&nouser&nodate&nomdate{% raw %}}}{% endraw %}
 
 """)
 mail_end_marker = '%% END %%'
@@ -185,9 +185,9 @@ def respond_email(address_from, mail, subject, response):
     return msg
 
 
-def load_entry(directory, file):
+def load_entry(doku_namespace, directory, file):
     try:
-        entry = LogEntry.from_file(directory, file)
+        entry = LogEntry.from_file(doku_namespace, directory, file)
     except Exception as e:
         print('Ignoring corrupt entry %s: %s' % (file, str(e)))
         return None
@@ -229,6 +229,7 @@ def decode_multiple(encoded, _pattern=quopri_entry):
 
 class Config:
     def __init__(self, filename, needs_email, sync):
+        self.namespace = 'klog'
         config = configparser.ConfigParser()
         config.read(filename)
         try:
@@ -270,7 +271,8 @@ class Config:
 class KitchenLog:
     FILES_GLOB = join('20*', '*', '*.txt')
 
-    def __init__(self, repo):
+    def __init__(self, namespace, repo):
+        self._doku_namespace = namespace
         self.repo = repo
         self._directory = normpath(repo.working_dir)
         self._reload()
@@ -278,7 +280,8 @@ class KitchenLog:
     def _reload(self):
         target_entries = glob(join(self._directory, KitchenLog.FILES_GLOB))
         target_entries = [x[(len(self._directory) + 1):] for x in target_entries]
-        self._entries = [load_entry(self._directory, x) for x in target_entries]
+        self._entries = [load_entry(self._doku_namespace, self._directory, x)
+                         for x in target_entries]
         self._entries = list(filter(None, self._entries))
         self._entries.sort(key=lambda x: x.begin, reverse=True)
 
@@ -306,7 +309,7 @@ class KitchenLog:
         return None
 
     def new_entry(self, date):
-        entry = LogEntry.new(self._directory, date)
+        entry = LogEntry.new(self._doku_namespace, self._directory, date)
         self._entries.append(entry)
         return entry
 
@@ -338,10 +341,12 @@ class KitchenLog:
 
         for year, months in years.items():
             for month, entries in months.items():
-                month_rendered = month_page.render(date=entries[0].begin)
-                save_filename(month_rendered, join(target_path, '%d-%02d.txt'% (year, month)))
+                month_rendered = month_page.render(date=entries[0].begin,
+                                                   namespace=self._doku_namespace)
+                save_filename(month_rendered,
+                              join(target_path, '%d-%02d.txt' % (year, month)))
 
-        lp = landing_page.render(content=years)
+        lp = landing_page.render(content=years, namespace=self._doku_namespace)
         save_filename(lp, join(target_path, 'start.txt'))
 
     def handle_email(self, address_from, mail):

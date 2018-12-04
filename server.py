@@ -36,7 +36,7 @@ setlocale(LC_ALL, 'de_DE.UTF-8')
 f_config = os.path.join(os.environ['HOME'], '.config', 'klogrc')
 cfg = Config(f_config, needs_email=False, sync=True)
 
-klog = KitchenLog(cfg.repo)
+klog = KitchenLog(cfg.namespace, cfg.repo)
 app = Flask('klog')
 
 

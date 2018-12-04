@@ -87,7 +87,7 @@ def mediadir(date, index):
 
 
 class LogEntry:
-    def __init__(self, content, index, directory):
+    def __init__(self, doku_namespace, content, index, directory):
         self._remove = False
         self._filename = None
         self._filename_date = None
@@ -96,6 +96,7 @@ class LogEntry:
         self._removed_media = set()
         self._added_media = set()
         self._index = index
+        self._doku_namespace = doku_namespace
         self._begin, self._end, self._headers, self._content, = LogEntry.try_parse(content)
 
         media = glob(join(self._directory, self.mediadir, '*'))
@@ -156,8 +157,9 @@ class LogEntry:
 
     @property
     def gallery(self):
-        return '{{gallery>:kitchenlog:%s:%d?direct&lightbox}}' % \
-               (format_ymd(self.begin).replace('-', ':'), self._index)
+        return '{{gallery>:%s:%s:%d?direct&lightbox}}' % \
+               (self._doku_namespace, format_ymd(self.begin).replace('-', ':'),
+                self._index)
 
     @property
     def wikidate(self):
@@ -326,19 +328,19 @@ class LogEntry:
         return begin, end, headers, content
 
     @staticmethod
-    def from_file(directory, file):
+    def from_file(doku_namespace, directory, file):
         filename = join(directory, file)
         with open(filename, 'r') as f:
             content = f.read()
 
         index = int(file.rstrip('.txt').split('/')[2].split('-')[1])
 
-        entry = LogEntry(content, index, directory)
+        entry = LogEntry(doku_namespace, content, index, directory)
         entry.set_filename(filename)
 
         return entry
 
     @staticmethod
-    def new(directory, date):
+    def new(doku_namespace, directory, date):
         template = log_entry_template.render(today = format_ymd(date))
-        return LogEntry(template, 0, directory)
+        return LogEntry(doku_namespace, template, 0, directory)
