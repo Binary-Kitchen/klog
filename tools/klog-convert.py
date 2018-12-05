@@ -24,9 +24,9 @@ import os
 
 from shutil import copyfile
 
-wiki = '/mnt/lokal/@tmp/wiki'
+wiki = '/home/klog/wiki'
 pages = 'data/pages/kitchenlog'
-output = '/home/ralf/.cache/klog/kitchenlog'
+output = '/home/klog/.cache/klog/kitchenlog'
 
 target_media = os.path.join(output, 'media')
 
