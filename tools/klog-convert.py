@@ -106,6 +106,7 @@ def convert_medium(medium):
 
 def convert_entry(entry):
     header, content = entry
+    print('Working on %s' % header)
 
     media = re.findall(media_regex, content)
 
@@ -191,7 +192,7 @@ targets += glob.glob(os.path.join(wiki, pages, 'entry', '*/*/*.txt'))
 log_entries = dict()
 
 for target in targets:
-    #print('Parsing %s...' % target)
+    print('Parsing %s...' % target)
     entries = convert_file(target)
     for entry in entries:
         begin = entry[0][0]
@@ -199,9 +200,11 @@ for target in targets:
             log_entries[begin] = list()
         log_entries[begin].append(entry)
 
+print('Done with files, creating entries')
+
 os.makedirs(os.path.join(target_media), exist_ok=True)
 for date, entries in log_entries.items():
-    #print('Generating abstract entry for %s: %d kitchenlog entries' % (date, len(entries)))
+    print('Generating abstract entry for %s: %d kitchenlog entries' % (date, len(entries)))
     y, m, d = date.split('-')
     target_dir = os.path.join(output, y, m)
     os.makedirs(target_dir, exist_ok=True)
