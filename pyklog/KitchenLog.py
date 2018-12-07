@@ -285,14 +285,15 @@ class KitchenLog:
             return
 
         list(map(lambda x: x.save(), dirty))
+
+        self._reload()
+
         self._export_dokuwiki()
 
         self.repo.git.add('-A')
         self.repo.git.commit('--allow-empty', '-m', message)
         if not no_sync:
             self.repo.git.push('origin')
-
-        self._reload()
 
     def get(self, date):
         return [x for x in self._entries if x._begin == date]
