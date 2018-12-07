@@ -176,6 +176,7 @@ parser = argparse.ArgumentParser(description='klog - Binary Kitchen log cmdline 
 parser.add_argument('date', type=check_date, default=format_ymd(datetime.date.today()), nargs='?',
                     help='date in Y-M-D, default: today')
 parser.add_argument('-n', '--no-sync', action='store_true', default=False, help="Don't sync repository")
+parser.add_argument('-d', '--dokuonly', action='store_true', default=False, help="DEV: only create dokuwiki")
 parser.add_argument('-e', '--from-email', type=str, default=None, help="Mail receiver")
 args = parser.parse_args()
 
@@ -200,8 +201,14 @@ if args.from_email:
     s = smtplib.SMTP('localhost')
     s.send_message(response)
     s.quit()
-else:
+elif not args.dokuonly:
     update_repo = interactive_edit(klog)
 
+if args.dokuonly:
+    message = 'Refresh dokuwiki'
+    update_repo = True
+else:
+    message = 'Modified %s' % format_ymd(args.date)
+
 if update_repo:
-    klog.commit('Modified %s' % format_ymd(args.date), args.no_sync)
+    klog.commit(message, no_sync=args.no_sync, force=args.dokuonly)

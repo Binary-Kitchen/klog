@@ -278,9 +278,9 @@ class KitchenLog:
         self._entries = list(filter(None, self._entries))
         self._entries.sort(key=lambda x: x.begin, reverse=True)
 
-    def commit(self, message, no_sync=False):
+    def commit(self, message, no_sync=False, force=False):
         dirty = [x for x in self._entries if x.dirty]
-        if len(dirty) == 0:
+        if force is False and len(dirty) == 0:
             return
 
         list(map(lambda x: x.save(), dirty))
