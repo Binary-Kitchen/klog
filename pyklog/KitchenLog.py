@@ -23,6 +23,7 @@ import email
 import git
 import re
 
+from dateutil.relativedelta import relativedelta
 from email.mime.text import MIMEText
 from email.header import decode_header
 
@@ -47,6 +48,10 @@ month_page = Template(
 """====== Küchen-Log {{ date.strftime('%B %Y') }} ======
 
 **//If it's not in the log, it didn't happen!//**
+
+Hier geht's zu {% if before -%} [[:{{ namespace }}:{{ before.strftime('%Y-%m | %B') }}]] / {% endif -%}
+[[:{{ namespace }}:start | Übersicht]]{% if next %} / [[:{{ namespace }}:{{ next.strftime('%Y-%m | %B') }}]]
+{% endif %}
 
 {% raw %}{{{% endraw -%}blog>{{ namespace }}:entry:{{ date.year }}:{{ '%02d' % date.month }}?31&nouser&nodate&nomdate{% raw %}}}{% endraw %}
 
@@ -335,8 +340,20 @@ class KitchenLog:
 
         for year, months in years.items():
             for month, entries in months.items():
-                month_rendered = month_page.render(date=entries[0].begin,
-                                                   namespace=self._doku_namespace)
+                date = entries[0].begin
+
+                next = date + relativedelta(months=1)
+                before = date - relativedelta(months=1)
+
+                if not (next.year in years and next.month in years[next.year]):
+                    next = None
+                if not (before.year in years and before.month in years[before.year]):
+                    before = None
+
+                month_rendered = month_page.render(date=date,
+                                                   namespace=self._doku_namespace,
+                                                   before=before,
+                                                   next=next)
                 save_filename(month_rendered,
                               join(target_path, '%d-%02d.txt' % (year, month)))
 
