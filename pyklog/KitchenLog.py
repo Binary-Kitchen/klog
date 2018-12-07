@@ -22,7 +22,6 @@ import datetime
 import email
 import git
 import re
-import urllib.request
 
 from email.mime.text import MIMEText
 from email.header import decode_header
