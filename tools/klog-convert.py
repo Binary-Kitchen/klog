@@ -114,6 +114,7 @@ def convert_entry(entry):
     topic, date = header.group(1), header.group(2)
 
     content = re.sub(media_regex, '', content)
+    content = content.replace('==== Bilder ====\n', '')
     content = content.rstrip('\n').lstrip('\n')
     # remove duplicate linebreaks
     content = re.sub(r'\n+', r'\n', content)
