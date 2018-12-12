@@ -121,6 +121,7 @@ def convert_entry(entry):
     # Remove Mogli's plenks
     content = re.sub(r' !', r'!', content)
     content = re.sub(r' \.', r' \.', content)
+    content = content.rstrip()
 
     date = parse_date(date)
 
