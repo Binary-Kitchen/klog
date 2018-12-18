@@ -30,7 +30,7 @@ output = '/home/klog/.cache/klog/kitchenlog'
 
 target_media = os.path.join(output, 'media')
 
-log_entry_regex = r'^===== (.*) =====$'
+log_entry_regex = r'^===== (.*) =====\s*$'
 media_regex = r'({{.*?}})'
 header_regex = r'(.*): (.*)'
 
