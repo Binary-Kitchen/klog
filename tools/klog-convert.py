@@ -100,7 +100,10 @@ def convert_medium(medium):
             break
 
     # Locate the file.
-    file = re.sub(r':', '/', file[1:])
+    file = re.sub(r':', '/', file)
+    if file[0] == '/':
+        file = file[1:]
+    print(file)
 
     return file, options
 
